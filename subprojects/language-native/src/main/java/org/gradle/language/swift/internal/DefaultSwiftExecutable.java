@@ -128,7 +128,7 @@ public class DefaultSwiftExecutable extends DefaultSwiftBinary implements SwiftE
     }
 
     @Override
-    public Set<SoftwareComponentVariant> getAllVariants() {
+    public Set<? extends SoftwareComponentVariant> getAllVariants() {
         Configuration runtimeElements = runtimeElementsProperty.get();
         return Collections.singleton(new ConfigurationSoftwareComponentVariant(getIdentity().getRuntimeVariant(), runtimeElements.getAllArtifacts(), runtimeElements));
     }
