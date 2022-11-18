@@ -131,9 +131,6 @@ data class CIBuildModel(
                 TestCoverage(34, TestType.allVersionsIntegMultiVersion, Os.WINDOWS, JvmCategory.MIN_VERSION_WINDOWS, ALL_CROSS_VERSION_BUCKETS.size),
                 TestCoverage(36, TestType.platform, Os.MACOS, JvmCategory.MAX_LTS_VERSION, expectedBucketNumber = 20, arch = Arch.AARCH64)
             ),
-            docsTests = listOf(
-                DocsTestCoverage(Os.MACOS, JvmCategory.MAX_VERSION, listOf(CONFIG_CACHE_DISABLED)),
-            ),
             performanceTests = slowPerformanceTestCoverages,
             performanceTestPartialTriggers = listOf(PerformanceTestPartialTrigger("All Performance Tests", "AllPerformanceTests", performanceRegressionTestCoverages + slowPerformanceTestCoverages))
         ),
