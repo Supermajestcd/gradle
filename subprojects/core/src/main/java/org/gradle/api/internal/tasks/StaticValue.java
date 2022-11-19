@@ -20,8 +20,8 @@ import org.gradle.api.Buildable;
 import org.gradle.api.Task;
 import org.gradle.api.internal.provider.HasConfigurableValueInternal;
 import org.gradle.api.internal.provider.PropertyInternal;
-import org.gradle.api.internal.tasks.properties.PropertyValue;
 import org.gradle.api.provider.HasConfigurableValue;
+import org.gradle.internal.properties.PropertyValue;
 import org.gradle.internal.state.ModelObject;
 
 import javax.annotation.Nullable;
@@ -70,9 +70,8 @@ public class StaticValue implements PropertyValue {
         return value;
     }
 
-    @Nullable
     @Override
-    public Object getUnprocessedValue() {
-        return value;
+    public String toString() {
+        return "Static: " + value;
     }
 }

@@ -24,11 +24,11 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.ProjectLayout;
-import org.gradle.api.internal.FeaturePreviews;
 import org.gradle.api.internal.file.FileOperations;
 import org.gradle.api.internal.file.FileTreeInternal;
 import org.gradle.api.internal.file.temp.TemporaryFileProvider;
 import org.gradle.api.internal.tasks.compile.CleaningJavaCompiler;
+import org.gradle.api.internal.tasks.compile.CommandLineJavaCompileSpec;
 import org.gradle.api.internal.tasks.compile.CompilationSourceDirs;
 import org.gradle.api.internal.tasks.compile.CompilerForkUtils;
 import org.gradle.api.internal.tasks.compile.DefaultGroovyJavaJointCompileSpec;
@@ -58,6 +58,7 @@ import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.SkipWhenEmpty;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.WorkResult;
+import org.gradle.internal.buildoption.FeatureFlags;
 import org.gradle.internal.file.Deleter;
 import org.gradle.internal.jvm.Jvm;
 import org.gradle.internal.jvm.inspection.JvmMetadataDetector;
@@ -83,7 +84,7 @@ import static org.gradle.api.internal.FeaturePreviews.Feature.GROOVY_COMPILATION
  * Compiles Groovy source files, and optionally, Java source files.
  */
 @CacheableTask
-public class GroovyCompile extends AbstractCompile implements HasCompileOptions {
+public abstract class GroovyCompile extends AbstractCompile implements HasCompileOptions {
     private FileCollection groovyClasspath;
     private final ConfigurableFileCollection astTransformationClasspath;
     private final CompileOptions compileOptions;
@@ -126,7 +127,7 @@ public class GroovyCompile extends AbstractCompile implements HasCompileOptions 
     }
 
     private boolean experimentalCompilationAvoidanceEnabled() {
-        return getFeaturePreviews().isFeatureEnabled(GROOVY_COMPILATION_AVOIDANCE);
+        return getFeatureFlags().isEnabled(GROOVY_COMPILATION_AVOIDANCE);
     }
 
     @TaskAction
@@ -134,8 +135,15 @@ public class GroovyCompile extends AbstractCompile implements HasCompileOptions 
         checkGroovyClasspathIsNonEmpty();
         warnIfCompileAvoidanceEnabled();
         GroovyJavaJointCompileSpec spec = createSpec();
+        maybeDisableIncrementalCompilationAfterFailure(spec);
         WorkResult result = getCompiler(spec, inputChanges).execute(spec);
         setDidWork(result.getDidWork());
+    }
+
+    private void maybeDisableIncrementalCompilationAfterFailure(GroovyJavaJointCompileSpec spec) {
+        if (CommandLineJavaCompileSpec.class.isAssignableFrom(spec.getClass())) {
+            spec.getCompileOptions().setSupportsIncrementalCompilationAfterFailure(false);
+        }
     }
 
     /**
@@ -412,7 +420,7 @@ public class GroovyCompile extends AbstractCompile implements HasCompileOptions 
     }
 
     @Inject
-    protected FeaturePreviews getFeaturePreviews() {
+    protected FeatureFlags getFeatureFlags() {
         throw new UnsupportedOperationException();
     }
 
